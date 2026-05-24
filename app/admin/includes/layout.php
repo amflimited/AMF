@@ -12,8 +12,8 @@ function header_page($title) {
 function footer_page() {
     echo '</main><nav class="bottom">';
     echo '<a href="' . h(admin_url('index.php')) . '">Home</a>';
+    echo '<a href="' . h(admin_url('pages/source-acquisition.php')) . '">Acquire</a>';
     echo '<a href="' . h(admin_url('pages/source-candidates.php')) . '">Candidates</a>';
-    echo '<a href="' . h(admin_url('pages/states.php')) . '">States</a>';
     echo '<a href="' . h(admin_url('pages/sources.php')) . '">Sources</a>';
     echo '<a href="' . h(admin_url('pages/runs.php')) . '">Runs</a>';
     echo '<a href="' . h(admin_url('pages/storage.php')) . '">Storage</a>';
