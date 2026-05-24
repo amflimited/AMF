@@ -1,5 +1,0 @@
----
-deployment:
-  tasks:
-    - export DEPLOYPATH=$HOME/public_html/
-    - /bin/rsync -av --delete --exclude='.git' --exclude='.env' --exclude='env_setup.php' --exclude='root_setup.php' --exclude='app/admin/setup_admin.php' ./ $DEPLOYPATH

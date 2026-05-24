@@ -1,6 +1,0 @@
-.env
-*.log
-app/collector/storage/temp/*
-app/collector/storage/debug/*
-!app/collector/storage/temp/.gitkeep
-!app/collector/storage/debug/.gitkeep
