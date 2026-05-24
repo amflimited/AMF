@@ -1,6 +1,0 @@
-MONETA_RELEASE_MAILBOX_TEST
-version: moneta-github-mailbox-test-20260522-050000
-purpose: Verify ChatGPT can write a release artifact into GitHub and Moneta can pull it server-side from raw.githubusercontent.com.
-install_intent: none
-expected_changed_files: []
-boundary: connectivity test only; do not install application code from this package.
