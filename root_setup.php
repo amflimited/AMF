@@ -1,2 +1,3 @@
 <?php
-require __DIR__ . '/app/admin/setup_admin.php';
+http_response_code(404);
+exit;
