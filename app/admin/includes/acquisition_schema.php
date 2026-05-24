@@ -18,30 +18,12 @@ function ensure_acquisition_tables() {
         total_risk_weight INT UNSIGNED NOT NULL DEFAULT 70,
         decision ENUM('auto_promote_candidate','needs_sample','needs_exception_review','external_only','blocked') NOT NULL DEFAULT 'needs_exception_review',
         decision_reason TEXT NULL,
-        evaluator_version VARCHAR(64) NOT NULL DEFAULT 'source_acquisition_v1',
+        evaluator_version VARCHAR(64) NOT NULL DEFAULT 'source_acquisition_v2',
         created_at DATETIME NOT NULL,
         KEY idx_candidate (source_candidate_id),
         KEY idx_state_code (state_code),
         KEY idx_decision (decision),
         KEY idx_route (acquisition_route)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
-    db()->exec("CREATE TABLE IF NOT EXISTS source_acquisition_runs (
-        id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        run_type ENUM('evaluate_candidates','auto_promote_safe','seed_and_evaluate') NOT NULL,
-        status ENUM('running','success','partial_success','failed') NOT NULL DEFAULT 'running',
-        candidates_seen INT UNSIGNED NOT NULL DEFAULT 0,
-        candidates_evaluated INT UNSIGNED NOT NULL DEFAULT 0,
-        auto_collect INT UNSIGNED NOT NULL DEFAULT 0,
-        sample_first INT UNSIGNED NOT NULL DEFAULT 0,
-        manual_exception INT UNSIGNED NOT NULL DEFAULT 0,
-        external_only INT UNSIGNED NOT NULL DEFAULT 0,
-        blocked INT UNSIGNED NOT NULL DEFAULT 0,
-        started_at DATETIME NOT NULL,
-        finished_at DATETIME NULL,
-        notes TEXT NULL,
-        KEY idx_started (started_at),
-        KEY idx_status (status)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }
 
@@ -106,19 +88,19 @@ function evaluate_candidate_acquisition($candidate) {
         $storageRisk = 20;
         $reasons[] = 'HTML table source class detected; system should run sample before full import.';
     } elseif ($type === 'search_form') {
-        $route = 'manual_exception';
-        $decision = 'needs_exception_review';
-        $compatible = false;
-        $complianceRisk = 20;
+        $route = 'sample_first';
+        $decision = 'needs_sample';
+        $compatible = true;
+        $complianceRisk = 10;
         $storageRisk = 20;
-        $reasons[] = 'Search-form source detected. Needs automated probe/parser decision before promotion.';
+        $reasons[] = 'Search-form source class is an allowed acquisition type. System should run automated form probe/sample first; manual review only if CAPTCHA, login, JS-only behavior, rate-limit block, or prohibited terms are detected.';
     } elseif ($type === 'pdf') {
-        $route = 'manual_exception';
-        $decision = 'needs_exception_review';
-        $compatible = false;
+        $route = 'sample_first';
+        $decision = 'needs_sample';
+        $compatible = true;
         $complianceRisk = 20;
         $storageRisk = 40;
-        $reasons[] = 'PDF-heavy source detected; not MVP default unless no structured source exists.';
+        $reasons[] = 'PDF source class detected. Route to controlled low-volume sample before deciding whether it remains MVP-feasible.';
     } else {
         $route = 'manual_exception';
         $decision = 'needs_exception_review';
