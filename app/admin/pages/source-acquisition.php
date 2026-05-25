@@ -5,6 +5,9 @@ require_once __DIR__.'/../includes/acquisition_schema.php';
 require_login();
 ensure_acquisition_tables();
 header_page('Source Acquisition');
+$root = dirname(__DIR__, 3);
+$workerLog = $root . '/app/collector/storage/source_acquisition_worker.log';
+$workerTail = file_exists($workerLog) ? implode('', array_slice(file($workerLog), -60)) : 'No worker log yet.';
 $summary = one("SELECT
     (SELECT COUNT(*) FROM source_candidates) candidates,
     (SELECT COUNT(*) FROM source_probe_results) probes,
@@ -22,16 +25,20 @@ $latest = rows("SELECT c.state_code, c.candidate_url, p.http_status, p.probe_sta
 ?>
 <section class="card">
 <h2>Automated Acquisition</h2>
-<p>This page should not rubber-stamp every source. It probes real pages first, then routes based on observed evidence: HTTP status, form/table/download links, CAPTCHA, login, bot blocks, and JavaScript-only behavior.</p>
+<p>Source acquisition now has two modes: automatic background worker for normal operation, and manual probe button only for immediate testing.</p>
+</section>
+<section class="card">
+<h2>One-Time Cron Setup</h2>
+<p>Add this cPanel cron after candidates are seeded. It runs the next small batch automatically.</p>
+<pre>/usr/local/bin/php -q /home/reveqwuv/public_html/app/collector/jobs/source_acquisition_worker.php 3 &gt;/dev/null 2&gt;&amp;1</pre>
+<p>Recommended cadence: every 5 minutes. This is for source acquisition background work, not site deployment.</p>
+</section>
+<section class="card">
 <form method="post" action="<?=h(admin_url('actions/probe-source-candidates.php'))?>">
 <input type="hidden" name="csrf" value="<?=h(csrf())?>">
-<label>Probe batch size</label>
-<input name="limit" type="number" min="1" max="10" value="5">
-<p><button>Probe Next Candidates</button></p>
-</form>
-<form method="post" action="<?=h(admin_url('actions/auto-evaluate-sources.php'))?>">
-<input type="hidden" name="csrf" value="<?=h(csrf())?>">
-<p><button>Rebuild Routes From Probe Results</button></p>
+<label>Manual test batch size</label>
+<input name="limit" type="number" min="1" max="10" value="3">
+<p><button>Probe Next Candidates Now</button></p>
 </form>
 </section>
 <section class="card">
@@ -43,8 +50,9 @@ $latest = rows("SELECT c.state_code, c.candidate_url, p.http_status, p.probe_sta
 <div class="row"><strong>Exceptions</strong><span><?=h($summary['manual_exception'] ?? 0)?></span></div>
 <div class="row"><strong>External-only</strong><span><?=h($summary['external_only'] ?? 0)?></span></div>
 </section>
+<section class="card"><h2>Worker Log</h2><pre><?=h($workerTail)?></pre></section>
 <?php if (!$latest): ?>
-<section class="card"><p>No evaluated routes yet. Probe candidates first.</p></section>
+<section class="card"><p>No evaluated routes yet. Seed candidates, then let the worker probe them.</p></section>
 <?php endif; ?>
 <?php foreach ($latest as $r): ?>
 <section class="card">
