@@ -13,9 +13,9 @@ function footer_page() {
     echo '</main><nav class="bottom">';
     echo '<a href="' . h(admin_url('index.php')) . '">Home</a>';
     echo '<a href="' . h(admin_url('pages/source-acquisition.php')) . '">Acquire</a>';
+    echo '<a href="' . h(admin_url('pages/form-adapters.php')) . '">Forms</a>';
     echo '<a href="' . h(admin_url('pages/sample-runs.php')) . '">Samples</a>';
     echo '<a href="' . h(admin_url('pages/sources.php')) . '">Sources</a>';
-    echo '<a href="' . h(admin_url('pages/runs.php')) . '">Runs</a>';
     echo '<a href="' . h(admin_url('pages/storage.php')) . '">Storage</a>';
     echo '</nav></body></html>';
 }
